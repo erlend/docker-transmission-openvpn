@@ -5,7 +5,7 @@ VOLUME /data
 VOLUME /config
 
 # Update packages and install software
-RUN apk add -U transmission-cli transmission-daemon openvpn curl && \
+RUN apk add -U transmission-cli transmission-daemon privoxy openvpn curl && \
         rm -rf /var/cache/apk/* && \
         curl -L https://github.com/jwilder/dockerize/releases/download/v0.0.2/dockerize-linux-amd64-v0.0.2.tar.gz | tar -C /usr/local/bin -xzv
 
@@ -88,5 +88,5 @@ ENV OPENVPN_USERNAME=**None** \
     "TRANSMISSION_WATCH_DIR_ENABLED=true" \
     "TRANSMISSION_HOME=/data/transmission-home"
 
-# Expose port
-EXPOSE 9091
+# Expose ports
+EXPOSE 9091 8118

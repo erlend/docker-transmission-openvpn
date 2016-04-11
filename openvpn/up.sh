@@ -4,4 +4,4 @@
 echo $4 > /var/tmp/vpn_ip
 
 [ "$OPENVPN_PROVIDER" = "PIA" ] && sv up transmission-periodicupdates
-sv up transmission
+sv up transmission privoxy

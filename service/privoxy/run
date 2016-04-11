@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -e
+
+exec 2>&1
+exec su-exec privoxy privoxy --no-daemon /etc/privoxy/config
