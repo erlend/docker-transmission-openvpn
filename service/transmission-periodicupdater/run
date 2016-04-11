@@ -1,0 +1,14 @@
+#!/bin/sh
+. /etc/envvars
+
+exec 2>&1
+set -e
+
+if [ ! -f /var/tmp/vpn_ip ]; then
+  echo "transmission-periodicupdater: Waiting for VPN connection"
+  exit 1
+fi
+
+LOCAL_VPN_IP=`cat /var/tmp/vpn_ip`
+echo "STARTING PORT UPDATER"
+exec /etc/transmission/periodicUpdates.sh $LOCAL_VPN_IP

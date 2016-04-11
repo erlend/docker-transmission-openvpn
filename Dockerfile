@@ -1,25 +1,16 @@
-# Transmission and OpenVPN
-#
-# Version 1.8
-
-FROM ubuntu:14.04
-MAINTAINER Kristian Haugene
+FROM erlend/baseimage:latest
+MAINTAINER Erlend Finvåg <erlend.finvag@gmail.com>
 
 VOLUME /data
 VOLUME /config
 
 # Update packages and install software
-RUN apt-get update \
-    && apt-get -y install software-properties-common \
-    && add-apt-repository ppa:transmissionbt/ppa \
-    && apt-get update \
-    && apt-get install -y transmission-cli transmission-common transmission-daemon openvpn curl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    && curl -L https://github.com/jwilder/dockerize/releases/download/v0.0.2/dockerize-linux-amd64-v0.0.2.tar.gz | tar -C /usr/local/bin -xzv
+RUN apk add -U transmission-cli transmission-daemon openvpn curl && \
+        rm -rf /var/cache/apk/* && \
+        curl -L https://github.com/jwilder/dockerize/releases/download/v0.0.2/dockerize-linux-amd64-v0.0.2.tar.gz | tar -C /usr/local/bin -xzv
 
 # Add configuration and scripts
-ADD openvpn/ /etc/openvpn/
-ADD transmission/ /etc/transmission/
+COPY . /etc
 
 ENV OPENVPN_USERNAME=**None** \
     OPENVPN_PASSWORD=**None** \
@@ -97,6 +88,5 @@ ENV OPENVPN_USERNAME=**None** \
     "TRANSMISSION_WATCH_DIR_ENABLED=true" \
     "TRANSMISSION_HOME=/data/transmission-home"
 
-# Expose port and run
+# Expose port
 EXPOSE 9091
-CMD ["/etc/openvpn/start.sh"]

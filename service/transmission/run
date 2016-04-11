@@ -1,0 +1,37 @@
+#!/bin/sh
+. /etc/envvars
+
+exec 2>&1
+set -e
+
+if [ ! -f /var/tmp/vpn_ip ]; then
+  echo "transmission: Waiting for VPN connection"
+  exit 1
+fi
+
+# This script will be called with tun/tap device name as parameter 1, and local IP as parameter 4
+# See https://openvpn.net/index.php/open-source/documentation/manuals/65-openvpn-20x-manpage.html (--up cmd)
+export TRANSMISSION_BIND_ADDRESS_IPV4=`cat /var/tmp/vpn_ip`
+
+# Ensure TRANSMISSION_HOME is created
+mkdir -p ${TRANSMISSION_HOME}
+chown -R transmission ${TRANSMISSION_HOME}
+
+echo "Generating transmission settings.json from env variables"
+dockerize -template /etc/transmission/settings.tmpl:${TRANSMISSION_HOME}/settings.json /bin/true
+
+# add transmission credentials from env vars
+echo $TRANSMISSION_RPC_USERNAME > /config/transmission-credentials.txt
+echo $TRANSMISSION_RPC_PASSWORD >> /config/transmission-credentials.txt
+
+if [ ! -e "/dev/random" ]; then
+  # Avoid "Fatal: no entropy gathering module detected" error
+  echo "INFO: /dev/random not found - symlink to /dev/urandom"
+  ln -s /dev/urandom /dev/random
+fi
+
+echo "STARTING TRANSMISSION"
+exec su-exec transmission /usr/bin/transmission-daemon \
+  --foreground \
+  --config-dir ${TRANSMISSION_HOME} \
+  --logfile ${TRANSMISSION_HOME}/transmission.log
