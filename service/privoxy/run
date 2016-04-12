@@ -1,6 +1,14 @@
 #!/bin/sh
 
 set -e
-
 exec 2>&1
-exec su-exec privoxy privoxy --no-daemon /etc/privoxy/config
+
+if [ ! -d /config/privoxy ]; then
+  echo "Creating privoxy config files"
+  cp -a /etc/privoxy /config/
+  cd /config/privoxy
+  sed -i "s/^\(confdir\).*/\1 \/config\/privoxy/" config
+  sed -i "s/^\(listen-address\).*/\1 0.0.0.0:8118/" config
+fi
+
+exec su-exec privoxy privoxy --no-daemon /config/privoxy/config
